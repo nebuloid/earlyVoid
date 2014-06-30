@@ -4,8 +4,11 @@ using System.Collections;
 public class DestroyerScript : MonoBehaviour {
 
 	void onTriggerEnter2D(Collider2D other){
+		Debug.Log("Trigger Enter!");
 		if(other.tag == "Player"){
-			Debug.Break ();
+			Debug.Log("Player Dies!");
+			Destroy (other.gameObject);
+			Application.LoadLevel(Application.loadedLevelName);
 			return;
 		}
 
