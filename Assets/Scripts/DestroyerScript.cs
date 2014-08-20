@@ -3,10 +3,8 @@ using System.Collections;
 
 public class DestroyerScript : MonoBehaviour {
 
-	void onTriggerEnter2D(Collider2D other){
-		Debug.Log("Trigger Enter!");
+	void OnTriggerEnter2D(Collider2D other){
 		if(other.tag == "Player"){
-			Debug.Log("Player Dies!");
 			Destroy (other.gameObject);
 			Application.LoadLevel(Application.loadedLevelName);
 			return;

@@ -25,6 +25,7 @@ public class Camera2DFollow : MonoBehaviour {
 	void Update () {
 		
 		// only update lookahead pos if accelerating or changed direction
+		
 		float xMoveDelta = (target.position - lastTargetPosition).x;
 
 	    bool updateLookAheadTarget = Mathf.Abs(xMoveDelta) > lookAheadMoveThreshold;

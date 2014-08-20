@@ -12,14 +12,20 @@ public class PlatformerCharacter2D : MonoBehaviour
 	
 	[SerializeField] bool airControl = false;			// Whether or not a player can steer while jumping;
 	[SerializeField] LayerMask whatIsGround;			// A mask determining what is ground to the character
+	[SerializeField] LayerMask whatIsWall;
 	
 	Transform groundCheck;								// A position marking where to check if the player is grounded.
-	float groundedRadius = .2f;							// Radius of the overlap circle to determine if grounded
+	float groundedRadius = .3f;							// Radius of the overlap circle to determine if grounded
 	bool grounded = false;								// Whether or not the player is grounded.
 	Transform ceilingCheck;								// A position marking where to check for ceilings
 	float ceilingRadius = .01f;							// Radius of the overlap circle to determine if the player can stand up
 	Animator anim;										// Reference to the player's animator component.
 
+	//Transform rightWallCheck;
+	//float wallRadius = .2f;
+
+
+	bool touchingWall = false;
 	bool doubleJump = false;
 
     void Awake()
@@ -27,6 +33,7 @@ public class PlatformerCharacter2D : MonoBehaviour
 		// Setting up references.
 		groundCheck = transform.Find("GroundCheck");
 		ceilingCheck = transform.Find("CeilingCheck");
+		//rightWallCheck = transform.Find("RightWallCheck");
 		anim = GetComponent<Animator>();
 	}
 
@@ -37,14 +44,24 @@ public class PlatformerCharacter2D : MonoBehaviour
 		grounded = Physics2D.OverlapCircle(groundCheck.position, groundedRadius, whatIsGround);
 		anim.SetBool("Ground", grounded);
 
-		// Set the vertical animation
-		anim.SetFloat("vSpeed", rigidbody2D.velocity.y);
-
+		//WALL JUMP - WALL CHECK
+		touchingWall = Physics2D.OverlapCircle(groundCheck.position, groundedRadius, whatIsWall);
+		//anim.SetBool("WallJumping", touchingWall);
+		
 		if(grounded) 
 			doubleJump = false;
+
+		if (touchingWall) 
+		{
+			grounded = false; 
+			doubleJump = false; 
+		}
+
+		// Set the vertical animation
+		anim.SetFloat("vSpeed", rigidbody2D.velocity.y);
 	}
 
-
+	//file: Platformer2DUserControl.cs
 	public void Move(float move, bool crouch, bool jump)
 	{
 
@@ -81,9 +98,14 @@ public class PlatformerCharacter2D : MonoBehaviour
 				// ... flip the player.
 				Flip();
 		}
+		
+		if (touchingWall && jump) 
+		{
+			WallJump ();
+		}
 
         // If the player should jump...
-        if ((grounded || !doubleJump) && jump) {
+		if ((grounded || !doubleJump) && jump && !touchingWall) {
             // Add a vertical force to the player.
             anim.SetBool("Ground", false);
 
@@ -95,8 +117,19 @@ public class PlatformerCharacter2D : MonoBehaviour
 			if(! grounded)
 				doubleJump = true;
         }
+
+		
+
+		//record character information here
 	}
 
+	void WallJump () 
+	{
+
+		//reset upward velocity for better wall jump
+		rigidbody2D.velocity = new Vector2(rigidbody2D.velocity.x, 0);
+		rigidbody2D.AddForce (new Vector2 (jumpForce/2, jumpForce));
+	}
 	
 	void Flip ()
 	{
