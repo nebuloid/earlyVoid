@@ -3,13 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(PlatformerCharacter2D))]
+[RequireComponent(typeof(Camera2DFollow))]
 public class ObjectGhost : MonoBehaviour {
 
-	public static ObjectGhost og;
+	private ObjectGhost og;
+	static ObjectGhost ghost;
 
 	private float recordTime;
 	private bool recording = true;
 	private PlatformerCharacter2D character;
+	private Camera2DFollow camera;
 	private int runNumber;
 
 	public int ghostSpeed;
@@ -26,40 +29,55 @@ public class ObjectGhost : MonoBehaviour {
 	//private int CROUCHING = 4;
 	//private int JUMPING = 5;
 
+	private Vector3 originalPosition;
+	private Quaternion originalRotation;
+	
+	private Vector3 cameraOriginalPosition;
+	
 	void Awake()
 	{
-		//make sure there is only ever 1 of these objects
+		
+		character = GetComponent<PlatformerCharacter2D>();
+		GameObject cameraObject = GameObject.FindGameObjectWithTag("MainCamera");
+		camera = cameraObject.GetComponent<Camera2DFollow>();
+		runNumber = 1;
 
+		//make sure there is only ever 1 of these objects
+/*
 		if (og == null) {
-			DontDestroyOnLoad (gameObject);
+			DontDestroyOnLoad(gameObject);
+			DontDestroyOnLoad(character);
+
 			og = this;
 			runNumber = 1;
-		} else if (og != this) {
-			Destroy (gameObject);
-		} else {
+			Debug.Log("First Time Initialize.");
+		} else if(og != this){
+			Destroy(gameObject);
+			Destroy(character);
 			runNumber++;
+			Debug.Log("Destroy");
 		}
+*/
 		
-		Debug.Log("run number = "+runNumber);
-
-		character = GetComponent<PlatformerCharacter2D>();
 	}
 
 	void Start()
 	{
 		recordTime = 0.0f;
-
+		originalPosition = character.transform.position;
+		originalRotation = character.transform.rotation;
+		
+		cameraOriginalPosition = camera.transform.position;
 	}
 
 	void FixedUpdate () {
 
 		if (recording) {
-			current.Add(Time.deltaTime);
 			recordTime += Time.deltaTime;
-			//may need additional information such as rotation
-			current.Add(character.transform.position.x);
-			current.Add(character.transform.position.y);
-			current.Add(character.transform.position.z);
+
+			current.Add(recordTime);
+			current.Add(character.transform.position); 
+			current.Add(character.transform.rotation);
 
 			//runNumber
 			movements.Add(current);
@@ -70,4 +88,17 @@ public class ObjectGhost : MonoBehaviour {
 		/// float to int
 		//timerInSecond = Mathf.Round (levelTimer);
 	}
+
+	public void Reset() {
+		recordTime = 0.0f;
+		character.transform.position = originalPosition;
+		character.transform.rotation = originalRotation;
+		camera.transform.position = cameraOriginalPosition;
+
+		current.Clear();
+		runNumber += 1;
+		Debug.Log(runNumber);
+		//TODO: NOW we need to find a way to replay the last ghost
+	}
 }
+

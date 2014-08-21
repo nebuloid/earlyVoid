@@ -65,7 +65,6 @@ public class PlatformerCharacter2D : MonoBehaviour
 	public void Move(float move, bool crouch, bool jump)
 	{
 
-
 		// If crouching, check to see if the character can stand up
 		if(!crouch && anim.GetBool("Crouch"))
 		{
@@ -141,4 +140,5 @@ public class PlatformerCharacter2D : MonoBehaviour
 		theScale.x *= -1;
 		transform.localScale = theScale;
 	}
+
 }
